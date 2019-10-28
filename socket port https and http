@@ -1,0 +1,33 @@
+// needed to read certificates from disk
+const fs          = require( "fs"    );
+
+// Servers with and without SSL
+const http        = require( "http"  )
+const https       = require( "https" );
+const httpPort    = 3333;
+const httpsPort   = 3334;
+const httpServer  = http.createServer();
+const httpsServer = https.createServer({
+    "key" : fs.readFileSync( "yourcert.key" ),
+    "cert": fs.readFileSync( "yourcert.crt" ),
+    "ca"  : fs.readFileSync( "yourca.crt"   )
+});
+httpServer.listen( httpPort, function() {
+    console.log(  `Listening HTTP on ${httpPort}` );
+});
+httpsServer.listen( httpsPort, function() {
+    console.log(  `Listening HTTPS on ${httpsPort}` );
+});
+
+// Socket.io
+const ioServer = require( "socket.io" );
+const io       = new ioServer();
+io.attach( httpServer );
+io.attach( httpsServer );
+
+io.on( "connection", function( socket ) {
+
+    console.log( "user connected" );
+    // ... your code
+
+});
